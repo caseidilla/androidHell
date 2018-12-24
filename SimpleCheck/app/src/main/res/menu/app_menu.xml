@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/settings"
+          android:title="@string/menu_1"
+        />
+    <item android:id="@+id/invite"
+          android:title="@string/menu_2"
+        />
+    <item android:id="@+id/show"
+        android:title="@string/menu_3"
+        />
+    <item android:id="@+id/hide"
+          android:title="@string/menu_33"
+          android:visible="false"
+        />
+    <item android:id="@+id/findu"
+        android:title="@string/menu_4"
+        />
+    <item android:id="@+id/findch"
+        android:title="@string/menu_5"
+        />
+    <item android:id="@+id/help"
+        android:title="@string/menu_6"
+        />
+    <item android:id="@+id/logout"
+        android:title="@string/menu_7"
+        />
+</menu>
