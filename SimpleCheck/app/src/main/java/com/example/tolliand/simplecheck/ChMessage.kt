@@ -5,7 +5,7 @@ import java.util.Calendar
 
 class ChMessage {
 
-    var messageText: String? = null
+    var messageText = String()
     var messageUser: String? = null
     var messageTime: Calendar? = null
 

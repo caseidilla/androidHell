@@ -6,49 +6,139 @@ import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.widget.EditText
-import android.widget.ListView
-import android.widget.Toast
 import adapters.ChatAdapter
+import android.content.Context
+import android.content.Intent
+import android.util.Log
+import android.view.*
+import android.widget.*
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.Volley
+import kotlinx.android.synthetic.main.activity_chat.*
 import kotlinx.android.synthetic.main.activity_main_list.*
+import org.json.JSONObject
 
 class Chat : AppCompatActivity() {
 
-    var result = ArrayList<ChMessage>()
+    private var listMess = ArrayList<ChMessage>()
+    private var userName = String()
+    private var partName = String()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
-        displayChatMessages()
+        val arguments = intent.extras
+        val name = arguments!!.get("name")!!.toString()
+        partName = name
+        val user = arguments!!.get("user")!!.toString()
+        userName = user
+        val actionBar = supportActionBar
+        actionBar!!.title = name
+        actionBar.setDisplayHomeAsUpEnabled(true)
+        actionBar.setDisplayHomeAsUpEnabled(true)
 
-        var listV: ListView = findViewById(R.id.list_of_messages)
-        var adapter = ChatAdapter(generateData())
-        adapter.notifyDataSetChanged()
+        val queue = Volley.newRequestQueue(this)
+        val url = "https://caseidilia.herokuapp.com/api/$user/dialog?participant=$name"
+
+        val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null,
+                Response.Listener { response ->
+                    for (i in 0 until response.length()){
+                            listMess.add(ChMessage(response.getJSONObject(i).getString("type"),
+                                    response.getJSONObject(i).getString("body")))
+
+                    }
+                    if (listMess.size != 0) {
+                        var notesAdapter = MessAdapter(this, listMess)
+                        list_of_messages.adapter = notesAdapter
+                        notesAdapter.notifyDataSetChanged()
+                    }
+                },
+                Response.ErrorListener { error ->
+                    Toast.makeText(applicationContext, String(error.networkResponse.data), Toast.LENGTH_SHORT).show()
+                }
+        )
+
+        queue.add(jsonArrayRequest)
     }
 
-    private fun generateData(): ArrayList<ChMessage> {
+    inner class MessAdapter : BaseAdapter {
 
-        var user: ChMessage = ChMessage("", "Botan")
-        result.add(user)
+        private var notesList = ArrayList<ChMessage>()
+        private var context: Context? = null
 
-        return result
+        constructor(context: Context, notesList: ArrayList<ChMessage>) : super() {
+            this.notesList = notesList
+            this.context = context
+        }
+
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
+
+            val view: View?
+            val vh: ViewHolder
+
+            if (convertView == null) {
+                view = layoutInflater.inflate(R.layout.mess, parent, false)
+                vh = ViewHolder(view)
+                view.tag = vh
+                Log.i("JSA", "set Tag for ViewHolder, position: " + position)
+            } else {
+                view = convertView
+                vh = view.tag as ViewHolder
+            }
+
+            vh.tvTitle.text = notesList[position].messageUser
+            vh.tvContent.text = notesList[position].messageText
+
+            return view
+        }
+
+        override fun getItem(position: Int): Any {
+            return notesList[position]
+        }
+
+        override fun getItemId(position: Int): Long {
+            return position.toLong()
+        }
+
+        override fun getCount(): Int {
+            return notesList.size
+        }
+    }
+
+    private class ViewHolder(view: View?) {
+        val tvTitle: TextView
+        val tvContent: TextView
+
+        init {
+            this.tvTitle = view?.findViewById(R.id.mess_user) as TextView
+            this.tvContent = view.findViewById(R.id.mess_text) as TextView
+        }
+
     }
 
     fun sendMess(view: View?){
-        val input: EditText = findViewById(R.id.input)
-        val mess: ChMessage = ChMessage(input.toString(), "Botan")
-        input.setText("")
+        val inputt: EditText = findViewById(R.id.input)
+        var messT = JSONObject()
+        messT.put("participant", partName)
+        messT.put("body", inputt.text.toString())
 
-        var listOfMess: ListView = findViewById(R.id.list_of_messages)
+        val queue = Volley.newRequestQueue(this)
+        val url = "https://caseidilia.herokuapp.com/api/$userName/dialog/send"
+
+        val jsonObjectRequest = SpecialJsonObjectRequest(Request.Method.POST, url, messT,
+                Response.Listener { response ->
+                    listMess.add(ChMessage(userName, inputt.text.toString()))
+                    inputt.setText("")
+                },
+                Response.ErrorListener { error ->
+                    Toast.makeText(applicationContext, String(error.networkResponse.data), Toast.LENGTH_SHORT).show()
+                }
+        )
+
+        queue.add(jsonObjectRequest)
         
-    }
-
-    private fun displayChatMessages() {
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -61,7 +151,7 @@ class Chat : AppCompatActivity() {
             R.id.chat_menu_profile ->{
                 val builder = AlertDialog.Builder(this)
                 builder.setTitle("User profile")
-                builder.setMessage("")
+                builder.setMessage(partName)
                 builder.setNeutralButton("OK"){ dialog, which ->
 
                 }
@@ -100,7 +190,7 @@ class Chat : AppCompatActivity() {
                 return true
             }
             R.id.chat_menu_delete -> {
-                val builder = AlertDialog.Builder(this)
+               /* val builder = AlertDialog.Builder(this)
                 builder.setTitle("Delete chat?")
                 builder.setMessage("Do you want to delete this chatik? \nAll history will be lost!" +
                         "\nWe won't be able to restore it!")
@@ -123,10 +213,30 @@ class Chat : AppCompatActivity() {
                 }
 
                 val dialog: AlertDialog = builder.create()
-                dialog.show()
+                dialog.show()*/
+                val queue = Volley.newRequestQueue(this)
+                val url = "https://caseidilia.herokuapp.com/api/$userName/dialog/delete"
+                val nnn = JSONObject()
+                nnn.put("participant", partName)
+
+                val jsonObjectRequest = SpecialJsonObjectRequest(Request.Method.POST, url,
+                        nnn,
+                        Response.Listener { response ->
+                        },
+                        Response.ErrorListener { error ->
+                            Toast.makeText(applicationContext, String(error.networkResponse.data), Toast.LENGTH_SHORT).show()
+                        }
+                )
+
+                queue.add(jsonObjectRequest)
                 return true
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 }
