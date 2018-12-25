@@ -160,33 +160,79 @@ class Chat : AppCompatActivity() {
                 return true
             }
             R.id.chat_menu_hide -> {
-                val dialogV: View = LayoutInflater.from(this).inflate(R.layout.activity_dialog_pin,null)
+                val dialogV: View = LayoutInflater.from(this).inflate(R.layout.activity_dialog_pin, null)
+                val etSearch = dialogV.findViewById(R.id.input_pin) as EditText
                 val builder = AlertDialog.Builder(this)
                 builder.setView(dialogV)
-                builder.setTitle("Enter PIN")
-                builder.setPositiveButton("Hide"){ dialog, which ->
-                    Toast.makeText(applicationContext,"Perfect", Toast.LENGTH_SHORT).show()
+                builder.setTitle("Enter pin")
+
+                builder.setPositiveButton("Hide") { dialog, which ->
+                    val queue = Volley.newRequestQueue(this)
+                    val url = "https://caseidilia.herokuapp.com/api/$userName/dialog/hide"
+                    val valueKey = findViewById<EditText>(R.id.input_pin)
+                    val nnn = JSONObject()
+                    nnn.put("pin", etSearch.text.toString())
+                    nnn.put("name", partName)
+// for (i in 0 until listDialog.length()) {
+// if (listChat[info.id.toInt()].nameUser == listDialog.getJSONObject(i).getString("name")) {
+// nnn.put("participant", listDialog.getJSONObject(i).getString("login"))
+// nnn.put("name", valueKey.text.toString())
+// }
+// }
+                    val jsonObjectRequest = SpecialJsonObjectRequest(Request.Method.POST, url,
+                            nnn,
+                            Response.Listener { response ->
+                            },
+                            Response.ErrorListener { error ->
+                                Toast.makeText(applicationContext, "No pin", Toast.LENGTH_SHORT).show()
+                            }
+                    )
+                    queue.add(jsonObjectRequest)
                 }
-                builder.setNegativeButton("Cancel"){ dialog, which ->
-                    Toast.makeText(applicationContext, "Bad", Toast.LENGTH_SHORT).show()
+                builder.setNegativeButton("Cancel") { dialog, which ->
                 }
+
                 val dialog: AlertDialog = builder.create()
                 dialog.show()
+
                 return true
             }
             R.id.chat_menu_show -> {
-                val dialogV: View = LayoutInflater.from(this).inflate(R.layout.activity_dialog_pin,null)
+                val dialogV: View = LayoutInflater.from(this).inflate(R.layout.activity_dialog_pin, null)
+                val etSearch = dialogV.findViewById(R.id.input_pin) as EditText
                 val builder = AlertDialog.Builder(this)
                 builder.setView(dialogV)
-                builder.setTitle("Enter PIN")
-                builder.setPositiveButton("Show"){ dialog, which ->
-                    Toast.makeText(applicationContext,"Perfect", Toast.LENGTH_SHORT).show()
+                builder.setTitle("Enter pin")
+
+                builder.setPositiveButton("Show") { dialog, which ->
+                    val queue = Volley.newRequestQueue(this)
+                    val url = "https://caseidilia.herokuapp.com/api/$userName/dialog/hide"
+                    val valueKey = findViewById<EditText>(R.id.input_pin)
+                    val nnn = JSONObject()
+                    nnn.put("pin", etSearch.text.toString())
+                    nnn.put("name", partName)
+// for (i in 0 until listDialog.length()) {
+// if (listChat[info.id.toInt()].nameUser == listDialog.getJSONObject(i).getString("name")) {
+// nnn.put("participant", listDialog.getJSONObject(i).getString("login"))
+// nnn.put("name", valueKey.text.toString())
+// }
+// }
+                    val jsonObjectRequest = SpecialJsonObjectRequest(Request.Method.POST, url,
+                            nnn,
+                            Response.Listener { response ->
+                            },
+                            Response.ErrorListener { error ->
+                                Toast.makeText(applicationContext, "No pin", Toast.LENGTH_SHORT).show()
+                            }
+                    )
+                    queue.add(jsonObjectRequest)
                 }
-                builder.setNegativeButton("Cancel"){ dialog, which ->
-                    Toast.makeText(applicationContext, "Bad", Toast.LENGTH_SHORT).show()
+                builder.setNegativeButton("Cancel") { dialog, which ->
                 }
+
                 val dialog: AlertDialog = builder.create()
                 dialog.show()
+
                 return true
             }
             R.id.chat_menu_delete -> {

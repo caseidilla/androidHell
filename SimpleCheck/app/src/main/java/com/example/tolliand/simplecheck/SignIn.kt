@@ -27,29 +27,14 @@ class SignIn : AppCompatActivity() {
 
     fun mainList(view: View?){
 
-        /*val queue = Volley.newRequestQueue(this)
-        val url = "https://caseidilia.herokuapp.com/api/login"
-
-        val jsonObjectRequest = JsonObjectRequest(Request.Method.POST, url, user,
-                Response.Listener { response ->
-                    Toast.makeText(applicationContext,"Welcome home", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this, MainList::class.java)
-                    startActivity(intent)
-                },
-                Response.ErrorListener { error ->
-                    Toast.makeText(applicationContext,"Incorrect data,\nplease, try again.", Toast.LENGTH_SHORT).show()
-                }
-        )
-
-        queue.add(jsonObjectRequest)*/
-
-        val inputP: EditText = findViewById(R.id.edit_password)
-        val inputU: EditText = findViewById(R.id.edit_user)
+        val inputP = findViewById<EditText>(R.id.edit_password)
+        val inputU = findViewById<EditText>(R.id.edit_user)
         user.put("login", inputU.text.toString())
         user.put("password", inputP.text.toString())
 
         val queue = Volley.newRequestQueue(this)
         val url = "https://caseidilia.herokuapp.com/api/login"
+        //val url = "http://10.0.2.2:8082/api/login"
 
         val jsonObjectRequest = SpecialJsonObjectRequest(Request.Method.POST, url, user,
                 Response.Listener { response ->
@@ -63,12 +48,6 @@ class SignIn : AppCompatActivity() {
         )
 
         queue.add(jsonObjectRequest)
-/*
-        if (true) {
-
-            val intent = Intent(this, MainList::class.java)
-            startActivity(intent)
-        }*/
     }
 
     override fun onSupportNavigateUp(): Boolean {

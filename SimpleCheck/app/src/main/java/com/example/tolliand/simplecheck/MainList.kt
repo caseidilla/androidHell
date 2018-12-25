@@ -48,6 +48,7 @@ class MainList : AppCompatActivity() {
                     for (i in 0 until response.length()) {
                         listChat.add(ChatInter(response.getJSONObject(i).getString("name"),
                                 response.getJSONObject(i).getString("login")))
+                        listDialog.put(response.getJSONObject(i))
                     }
                     if (listChat.size != 0) {
                         var notesAdapter = ChatAdapter(this, listChat)
@@ -144,72 +145,76 @@ class MainList : AppCompatActivity() {
         val info: AdapterContextMenuInfo = item.menuInfo as AdapterContextMenuInfo
         when (item.itemId) {
             R.id.hide -> {
-                val queue = Volley.newRequestQueue(this)
-                val url = "https://caseidilia.herokuapp.com/api/$userName/dialog/hide"
-                val nnn = JSONObject()
-                nnn.put("participant", listChat[info.id.toInt()].lastMess)
-                nnn.put("pin", edTex)
+                val dialogV: View = LayoutInflater.from(this).inflate(R.layout.activity_dialog_pin, null)
+                val etSearch = dialogV.findViewById(R.id.input_pin) as EditText
+                val builder = AlertDialog.Builder(this)
+                builder.setView(dialogV)
+                builder.setTitle("Enter pin")
 
-                val jsonObjectRequest = SpecialJsonObjectRequest(Request.Method.POST, url,
-                        nnn,
-                        Response.Listener { response ->
-                        },
-                        Response.ErrorListener { error ->
-                            if (String(error.networkResponse.data).contains("No pin")) {
-                                val builder = AlertDialog.Builder(this)
-                                builder.setTitle("Firstly you need to set your PIN")
-                                builder.setPositiveButton("Yes") { dialog, which ->
-                                    val intent = Intent(this, Settings::class.java)
-                                    startActivity(intent)
-                                }
-                                builder.setNegativeButton("Of course") { dialog, which ->
-                                    val intent = Intent(this, Settings::class.java)
-                                    startActivity(intent)
-                                }
-                                val dialog: AlertDialog = builder.create()
-                                dialog.show()
-                            }
-                            Toast.makeText(applicationContext, String(error.networkResponse.data), Toast.LENGTH_SHORT).show()
+                builder.setPositiveButton("Hide") { dialog, which ->
+                    val queue = Volley.newRequestQueue(this)
+                    val url = "https://caseidilia.herokuapp.com/api/$userName/dialog/hide"
+                    val valueKey = findViewById<EditText>(R.id.input_pin)
+                    val nnn = JSONObject()
+                    nnn.put("pin", etSearch.text.toString())
+                    for (i in 0 until listDialog.length()) {
+                        if (listChat[info.id.toInt()].nameUser == listDialog.getJSONObject(i).getString("name")) {
+                            nnn.put("participant", listDialog.getJSONObject(i).getString("login"))
                         }
-                )
+                    }
+                    val jsonObjectRequest = SpecialJsonObjectRequest(Request.Method.POST, url,
+                            nnn,
+                            Response.Listener { response ->
+                            },
+                            Response.ErrorListener { error ->
+                                Toast.makeText(applicationContext, "No pin", Toast.LENGTH_SHORT).show()
+                            }
+                    )
+                    queue.add(jsonObjectRequest)
+                }
+                builder.setNegativeButton("Cancel") { dialog, which ->
+                }
 
-                queue.add(jsonObjectRequest)
-                Toast.makeText(applicationContext, "Uno", Toast.LENGTH_SHORT).show()
+                val dialog: AlertDialog = builder.create()
+                dialog.show()
+
                 return true
             }
             R.id.show -> {
-                val queue = Volley.newRequestQueue(this)
-                val url = "https://caseidilia.herokuapp.com/api/$userName/dialog/hide"
-                val nnn = JSONObject()
-                nnn.put("participant", listChat[info.id.toInt()].lastMess)
-                nnn.put("pin", edTex)
 
-                val jsonObjectRequest = SpecialJsonObjectRequest(Request.Method.POST, url,
-                        nnn,
-                        Response.Listener { response ->
-                        },
-                        Response.ErrorListener { error ->
-                            if (String(error.networkResponse.data).contains("No pin")) {
-                                val builder = AlertDialog.Builder(this)
-                                builder.setTitle("Firstly you need to set your PIN")
-                                builder.setPositiveButton("Yes") { dialog, which ->
-                                    val intent = Intent(this, Settings::class.java)
-                                    startActivity(intent)
-                                }
-                                builder.setNegativeButton("Of course") { dialog, which ->
-                                    val intent = Intent(this, Settings::class.java)
-                                    startActivity(intent)
-                                }
-                                val dialog: AlertDialog = builder.create()
-                                dialog.show()
-                            }
-                            Toast.makeText(applicationContext, String(error.networkResponse.data), Toast.LENGTH_SHORT).show()
+                val dialogV: View = LayoutInflater.from(this).inflate(R.layout.activity_dialog_pin, null)
+                val etSearch = dialogV.findViewById(R.id.input_pin) as EditText
+                val builder = AlertDialog.Builder(this)
+                builder.setView(dialogV)
+                builder.setTitle("Enter pin")
+
+                builder.setPositiveButton("Show") { dialog, which ->
+                    val queue = Volley.newRequestQueue(this)
+                    val url = "https://caseidilia.herokuapp.com/api/$userName/dialog/hide"
+                    val valueKey = findViewById<EditText>(R.id.input_pin)
+                    val nnn = JSONObject()
+                    nnn.put("pin", etSearch.text.toString())
+                    for (i in 0 until listDialog.length()) {
+                        if (listChat[info.id.toInt()].nameUser == listDialog.getJSONObject(i).getString("name")) {
+                            nnn.put("participant", listDialog.getJSONObject(i).getString("login"))
                         }
-                )
+                    }
+                    val jsonObjectRequest = SpecialJsonObjectRequest(Request.Method.POST, url,
+                            nnn,
+                            Response.Listener { response ->
+                            },
+                            Response.ErrorListener { error ->
+                                Toast.makeText(applicationContext, "No pin", Toast.LENGTH_SHORT).show()
+                            }
+                    )
+                    queue.add(jsonObjectRequest)
+                }
+                builder.setNegativeButton("Cancel") { dialog, which ->
+                }
 
-                queue.add(jsonObjectRequest)
-                Toast.makeText(applicationContext, "Uno", Toast.LENGTH_SHORT).show()
-                //editItem(info.position) // метод, выполняющий действие при редактировании пункта меню
+                val dialog: AlertDialog = builder.create()
+                dialog.show()
+
                 return true
             }
             R.id.delete -> {
@@ -234,71 +239,41 @@ class MainList : AppCompatActivity() {
             }
             R.id.rename -> {
                 val dialogV: View = LayoutInflater.from(this).inflate(R.layout.activity_dialog_pin, null)
+                val etSearch = dialogV.findViewById(R.id.input_pin) as EditText
                 val builder = AlertDialog.Builder(this)
                 builder.setView(dialogV)
                 builder.setTitle("Enter new name")
-                val valueKey = findViewById<EditText>(R.id.input_pin)
 
-                val queue = Volley.newRequestQueue(this)
-                val url = "https://caseidilia.herokuapp.com/api/$userName/dialog/changeName"
-                val nnn = JSONObject()
-                for (i in 0 until listDialog.length()) {
-                    if (listChat[info.id.toInt()].nameUser == listDialog.getJSONObject(i).getString("name")) {
-                        nnn.put("participant", listDialog.getJSONObject(i).getString("login"))
-                        nnn.put("name", valueKey.text.toString())
-                    }
-                }
-
-                val jsonObjectRequest = SpecialJsonObjectRequest(Request.Method.POST, url,
-                        nnn,
-                        Response.Listener { response ->
-                        },
-                        Response.ErrorListener { error ->
-                            Toast.makeText(applicationContext, String(error.networkResponse.data), Toast.LENGTH_SHORT).show()
-                        }
-                )
                 builder.setPositiveButton("Rename") { dialog, which ->
+                    val queue = Volley.newRequestQueue(this)
+                    val url = "https://caseidilia.herokuapp.com/api/$userName/dialog/changeName"
+                    val nnn = JSONObject()
+                    nnn.put("name", etSearch.text.toString())
                     for (i in 0 until listDialog.length()) {
                         if (listChat[info.id.toInt()].nameUser == listDialog.getJSONObject(i).getString("name")) {
                             nnn.put("participant", listDialog.getJSONObject(i).getString("login"))
-                            nnn.put("name", valueKey.text.toString())
                         }
                     }
+                    val jsonObjectRequest = SpecialJsonObjectRequest(Request.Method.POST, url,
+                            nnn,
+                            Response.Listener { response ->
+                            },
+                            Response.ErrorListener { error ->
+                                Toast.makeText(applicationContext, String(error.networkResponse.data), Toast.LENGTH_SHORT).show()
+                            }
+                    )
                     queue.add(jsonObjectRequest)
                 }
                 builder.setNegativeButton("Cancel") { dialog, which ->
                 }
+
                 val dialog: AlertDialog = builder.create()
                 dialog.show()
-
 
                 return true
             }
         }
         return super.onContextItemSelected(item)
-    }
-
-    private fun requRen(str: String, pos: Int) {
-        val queue = Volley.newRequestQueue(this)
-        val url = "https://caseidilia.herokuapp.com/api/$userName/dialog/changeName"
-        val nnn = JSONObject()
-        for (i in 0 until listDialog.length()) {
-            if (listChat[pos].nameUser == listDialog.getJSONObject(i).getString("name")) {
-                nnn.put("participant", listDialog.getJSONObject(i).getString("login"))
-                nnn.put("name", str)
-            }
-        }
-
-        val jsonObjectRequest = SpecialJsonObjectRequest(Request.Method.POST, url,
-                nnn,
-                Response.Listener { response ->
-                },
-                Response.ErrorListener { error ->
-                    Toast.makeText(applicationContext, String(error.networkResponse.data), Toast.LENGTH_SHORT).show()
-                }
-        )
-
-        queue.add(jsonObjectRequest)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -340,55 +315,88 @@ class MainList : AppCompatActivity() {
                 return true
             }
             R.id.show -> {
-                val queue = Volley.newRequestQueue(this)
-                val url = "https://caseidilia.herokuapp.com/api/$userName/dialogs/hidden"
-                var nnn = JSONArray()
-                var ooo = JSONObject()
-                ooo.put("pin", "333")
-                nnn.put(ooo)
-
-                val jsonArrayRequest = JsonArrayRequest(Request.Method.POST, url, nnn,
-                        Response.Listener { response ->
-                            listChat.removeAll(listChat)
-                            for (i in 0 until response.length()){
-                                listChat.add(ChatInter(response.getJSONObject(i).getString("name"),
-                                        response.getJSONObject(i).getString("login")))
-                            }
-                        },
-                        Response.ErrorListener { error ->
-                            Toast.makeText(applicationContext, String(error.networkResponse.data), Toast.LENGTH_SHORT).show()
-                        }
-                )
-
-                queue.add(jsonArrayRequest)
-
-                return true
-            }
-            R.id.hide -> {
                 val dialogV: View = LayoutInflater.from(this).inflate(R.layout.activity_dialog_pin, null)
+                val etSearch = dialogV.findViewById(R.id.input_pin) as EditText
                 val builder = AlertDialog.Builder(this)
                 builder.setView(dialogV)
-                builder.setTitle("Enter PIN")
-                builder.setPositiveButton("Yes") { dialog, which ->
-                    Toast.makeText(applicationContext, "Perfect", Toast.LENGTH_SHORT).show()
+                builder.setTitle("Enter pin")
+
+                builder.setPositiveButton("Show") { dialog, which ->
+                    val queue = Volley.newRequestQueue(this)
+                    val url = "https://caseidilia.herokuapp.com/api/$userName/dialogs/hidden"
+                    val valueKey = findViewById<EditText>(R.id.input_pin)
+                    val nnn = JSONObject()
+                    nnn.put("pin", etSearch.text.toString())
+                    val ooo = JSONArray()
+                    ooo.put(nnn)
+// }
+                    val jsonArrayRequest = JsonArrayRequest(Request.Method.POST, url, ooo,
+                            Response.Listener { response ->
+                                listChat.removeAll(listChat)
+                                for (i in 0 until response.length()) {
+                                    listChat.add(ChatInter(response.getJSONObject(i).getString("name"),
+                                            response.getJSONObject(i).getString("login")))
+                                }
+                            },
+                            Response.ErrorListener { error ->
+                                Toast.makeText(applicationContext, "No pin", Toast.LENGTH_SHORT).show()
+                            }
+                    )
+                    queue.add(jsonArrayRequest)
                 }
-                builder.setNegativeButton("No") { dialog, which ->
-                    Toast.makeText(applicationContext, "Bad", Toast.LENGTH_SHORT).show()
+                builder.setNegativeButton("Cancel") { dialog, which ->
                 }
+
                 val dialog: AlertDialog = builder.create()
                 dialog.show()
 
                 return true
             }
+            R.id.hide -> {
+                val queue = Volley.newRequestQueue(this)
+                val url = "https://caseidilia.herokuapp.com/api/$userName/dialogs"
+                val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null,
+                        Response.Listener { response ->
+                            listChat.removeAll(listChat)
+                            for (i in 0 until response.length()) {
+                                listChat.add(ChatInter(response.getJSONObject(i).getString("name"),
+                                        response.getJSONObject(i).getString("login")))
+                            }
+                        },
+                        Response.ErrorListener { error ->
+                            Toast.makeText(applicationContext, error.message.toString(), Toast.LENGTH_SHORT).show()
+                        }
+                )
+                queue.add(jsonArrayRequest)
+
+                return true
+            }
             R.id.findu -> {
                 val dialogV: View = LayoutInflater.from(this).inflate(R.layout.activity_dialog_pin, null)
+                val etSearch = dialogV.findViewById(R.id.input_pin) as EditText
                 val builder = AlertDialog.Builder(this)
                 builder.setView(dialogV)
-                builder.setTitle("Enter user name")
-                builder.setPositiveButton("Search") { dialog, which ->
+                builder.setTitle("Enter new dialog name")
+
+                builder.setPositiveButton("Find") { dialog, which ->
+                    val queue = Volley.newRequestQueue(this)
+                    val url = "https://caseidilia.herokuapp.com/api/$userName/dialog/new"
+                    val nnn = JSONObject()
+                    nnn.put("participant", etSearch.text.toString())
+                    nnn.put("secret", false)
+                    val jsonObjectRequest = SpecialJsonObjectRequest(Request.Method.POST, url,
+                            nnn,
+                            Response.Listener { response ->
+                            },
+                            Response.ErrorListener { error ->
+                                //Toast.makeText(applicationContext, String(error.networkResponse.data), Toast.LENGTH_SHORT).show()
+                            }
+                    )
+                    queue.add(jsonObjectRequest)
                 }
-                builder.setNegativeButton("Cansel") { dialog, which ->
+                builder.setNegativeButton("Cancel") { dialog, which ->
                 }
+
                 val dialog: AlertDialog = builder.create()
                 dialog.show()
 
@@ -396,13 +404,25 @@ class MainList : AppCompatActivity() {
             }
             R.id.findch -> {
                 val dialogV: View = LayoutInflater.from(this).inflate(R.layout.activity_dialog_pin, null)
+                val etSearch = dialogV.findViewById(R.id.input_pin) as EditText
                 val builder = AlertDialog.Builder(this)
+                var s = String()
                 builder.setView(dialogV)
                 builder.setTitle("Enter chat name")
                 builder.setPositiveButton("Search") { dialog, which ->
+                    for (i in 0 until listChat.size){
+                        if (listChat[i].nameUser == etSearch.text.toString()){
+                            s = listChat[i].lastMess
+                        }
+                    }
+                    val intent = Intent(this, Chat::class.java)
+                    intent.putExtra("name", s)
+                    intent.putExtra("user", userName)
+                    startActivity(intent)
                 }
                 builder.setNegativeButton("Cancel") { dialog, which ->
                 }
+
                 val dialog: AlertDialog = builder.create()
                 dialog.show()
 
