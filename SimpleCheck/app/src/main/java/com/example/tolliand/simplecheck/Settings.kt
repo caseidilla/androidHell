@@ -36,7 +36,7 @@ class Settings : AppCompatActivity() {
             pin.put("oldPin", inputO.text.toString())
 
             val queue = Volley.newRequestQueue(this)
-            val url = "https://caseidilia.herokuapp.com/api/loupa/setPin"
+            val url = "https://caseidilia.herokuapp.com/api/svet/setPin"
 
             val jsonObjectRequest = SpecialJsonObjectRequest(Request.Method.POST, url, pin,
                     Response.Listener { response ->

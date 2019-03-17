@@ -29,8 +29,11 @@ class MainList : AppCompatActivity() {
 
     private var listChat = ArrayList<ChatInter>()
     private var listDialog = JSONArray()
-    private var userName = String()
+    public var userName = String()
     private var edTex = String()
+
+    private var jsonRefreshRequest:JsonArrayRequest? = null;
+    private var jsonRefreshRequestPin:JsonArrayRequest? = null;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,8 +46,10 @@ class MainList : AppCompatActivity() {
         val queue = Volley.newRequestQueue(this)
         val url = "https://caseidilia.herokuapp.com/api/$log/dialogs"
 
-        val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null,
+        jsonRefreshRequest = JsonArrayRequest(Request.Method.GET, url, null,
                 Response.Listener { response ->
+                    listChat.clear()
+                    listDialog = JSONArray();
                     for (i in 0 until response.length()) {
                         listChat.add(ChatInter(response.getJSONObject(i).getString("name"),
                                 response.getJSONObject(i).getString("login")))
@@ -68,7 +73,7 @@ class MainList : AppCompatActivity() {
                 }
         )
 
-        queue.add(jsonArrayRequest)
+        queue.add(jsonRefreshRequest)
 
 
     }
@@ -171,6 +176,7 @@ class MainList : AppCompatActivity() {
                             }
                     )
                     queue.add(jsonObjectRequest)
+                    queue.add(jsonRefreshRequest)
                 }
                 builder.setNegativeButton("Cancel") { dialog, which ->
                 }
@@ -208,6 +214,7 @@ class MainList : AppCompatActivity() {
                             }
                     )
                     queue.add(jsonObjectRequest)
+                    queue.add(jsonRefreshRequest)
                 }
                 builder.setNegativeButton("Cancel") { dialog, which ->
                 }
@@ -330,12 +337,26 @@ class MainList : AppCompatActivity() {
                     val ooo = JSONArray()
                     ooo.put(nnn)
 // }
-                    val jsonArrayRequest = JsonArrayRequest(Request.Method.POST, url, ooo,
+                    val jsonArrayRequest = CustomJsonArrayRequest(Request.Method.POST, url, nnn,
                             Response.Listener { response ->
-                                listChat.removeAll(listChat)
+                                listChat.clear()
+                                listDialog = JSONArray();
                                 for (i in 0 until response.length()) {
                                     listChat.add(ChatInter(response.getJSONObject(i).getString("name"),
                                             response.getJSONObject(i).getString("login")))
+                                    listDialog.put(response.getJSONObject(i))
+                                }
+                                if (listChat.size != 0) {
+                                    var notesAdapter = ChatAdapter(this, listChat)
+                                    listView.adapter = notesAdapter
+                                    notesAdapter.notifyDataSetChanged()
+                                    listView.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, position, id ->
+                                        val intent = Intent(this, Chat::class.java)
+                                        intent.putExtra("name", listChat[id.toInt()].lastMess)
+                                        intent.putExtra("user", userName)
+                                        startActivity(intent)
+                                    }
+                                    registerForContextMenu(findViewById(R.id.listView))
                                 }
                             },
                             Response.ErrorListener { error ->
@@ -354,20 +375,7 @@ class MainList : AppCompatActivity() {
             }
             R.id.hide -> {
                 val queue = Volley.newRequestQueue(this)
-                val url = "https://caseidilia.herokuapp.com/api/$userName/dialogs"
-                val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null,
-                        Response.Listener { response ->
-                            listChat.removeAll(listChat)
-                            for (i in 0 until response.length()) {
-                                listChat.add(ChatInter(response.getJSONObject(i).getString("name"),
-                                        response.getJSONObject(i).getString("login")))
-                            }
-                        },
-                        Response.ErrorListener { error ->
-                            Toast.makeText(applicationContext, error.message.toString(), Toast.LENGTH_SHORT).show()
-                        }
-                )
-                queue.add(jsonArrayRequest)
+                queue.add(jsonRefreshRequest)
 
                 return true
             }

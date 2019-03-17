@@ -45,8 +45,8 @@ class Chat : AppCompatActivity() {
         val jsonArrayRequest = JsonArrayRequest(Request.Method.GET, url, null,
                 Response.Listener { response ->
                     for (i in 0 until response.length()){
-                            listMess.add(ChMessage(response.getJSONObject(i).getString("type"),
-                                    response.getJSONObject(i).getString("body")))
+                        listMess.add(ChMessage(response.getJSONObject(i).getString("type"),
+                                response.getJSONObject(i).getString("body")))
 
                     }
                     if (listMess.size != 0) {
@@ -138,7 +138,7 @@ class Chat : AppCompatActivity() {
         )
 
         queue.add(jsonObjectRequest)
-        
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -236,30 +236,30 @@ class Chat : AppCompatActivity() {
                 return true
             }
             R.id.chat_menu_delete -> {
-               /* val builder = AlertDialog.Builder(this)
-                builder.setTitle("Delete chat?")
-                builder.setMessage("Do you want to delete this chatik? \nAll history will be lost!" +
-                        "\nWe won't be able to restore it!")
+                /* val builder = AlertDialog.Builder(this)
+                 builder.setTitle("Delete chat?")
+                 builder.setMessage("Do you want to delete this chatik? \nAll history will be lost!" +
+                         "\nWe won't be able to restore it!")
 
-                builder.setPositiveButton("Yes"){ dialog, which ->
-                    val dialogV: View = LayoutInflater.from(this).inflate(R.layout.activity_dialog_pin,null)
-                    val builderInner = AlertDialog.Builder(this)
-                    builderInner.setView(dialogV)
-                    builderInner.setTitle("Enter PIN")
-                    builderInner.setNeutralButton("Delete chatik!"){ dialog, which ->
-                        Toast.makeText(applicationContext,"Deleted", Toast.LENGTH_SHORT).show()
-                        this.finish()
-                    }
-                    val dialogInner: AlertDialog = builderInner.create()
-                    dialogInner.show()
-                }
+                 builder.setPositiveButton("Yes"){ dialog, which ->
+                     val dialogV: View = LayoutInflater.from(this).inflate(R.layout.activity_dialog_pin,null)
+                     val builderInner = AlertDialog.Builder(this)
+                     builderInner.setView(dialogV)
+                     builderInner.setTitle("Enter PIN")
+                     builderInner.setNeutralButton("Delete chatik!"){ dialog, which ->
+                         Toast.makeText(applicationContext,"Deleted", Toast.LENGTH_SHORT).show()
+                         this.finish()
+                     }
+                     val dialogInner: AlertDialog = builderInner.create()
+                     dialogInner.show()
+                 }
 
-                builder.setNegativeButton("No"){ dialog, which ->
+                 builder.setNegativeButton("No"){ dialog, which ->
 
-                }
+                 }
 
-                val dialog: AlertDialog = builder.create()
-                dialog.show()*/
+                 val dialog: AlertDialog = builder.create()
+                 dialog.show()*/
                 val queue = Volley.newRequestQueue(this)
                 val url = "https://caseidilia.herokuapp.com/api/$userName/dialog/delete"
                 val nnn = JSONObject()
